@@ -12,6 +12,7 @@ from langchain_community.vectorstores import LanceDB
 import lancedb
 os.environ["LANGCHAIN_API_KEY"] = "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"
 
+
 def connect_table(database):
     try:
         db = lancedb.connect("~/.lancedb")
@@ -35,26 +36,14 @@ def create_table(db):
     )
     return table
 
-def store_embeddings(content, document_title):
+def store_embeddings(query):
     db = lancedb.connect("~/.lancedb")
-    table = db.create_table(
-        "recipes",
-        data=[
-            {
-                "vector": OpenAIEmbeddings().embed_query("Recipes"),
-                "text": "Recipes",
-                "id": "1",
-            }
-        ],
-        mode="overwrite",
-    )
-
-    documents = character_text_splitter(content, document_title)
-    docsearch = LanceDB.from_documents(documents, OpenAIEmbeddings(), connection=table)
-
-    query = "Get METHOD for Aloo Palak"
-    docs = docsearch.similarity_search(query)
-    return st.error(f"docs: {docs[0].page_content}")
+    table = db.open_table("recipes")
+    
+    table.search(query)
+    # docsearch = LanceDB.from_documents(table.get_text, OpenAIEmbeddings(), connection=table)
+    # docs = docsearch.similarity_search(query)
+    return st.error(f"docs: {table.search(query)}")
 
 def read_docx(file_path):
     text = docx2txt.process(file_path)
@@ -106,37 +95,8 @@ def main():
     # Document title
     document_title = st.text_input("Enter the document title:")
 
-    # File upload
-    uploaded_file = st.file_uploader("Upload a document (doc, pdf) or provide a link", type=["docx", "pdf"])
-
-    if uploaded_file is not None:
-        try:
-            # If a file is uploaded
-            content = read_file(uploaded_file)
-            # embeddings_model = OpenAIEmbeddings()
-            # embeddings_model.embed_documents(content)
-            
-            store_embeddings(content, document_title)
-
-            texts = character_text_splitter(content, document_title)
-                
-            st.write("### Content:")
-            st.write(texts)
-            # st.write(embeddings_model[:5])
-        except FileNotFoundError as e:
-            st.error(f"Error reading content from the uploaded file: {e}")
-
-    # # Link input
-    # link_input = st.text_input("Or provide a link to a document (doc, pdf)")
-    # if st.button("Read from link"):
-    #     if link_input:
-    #         try:
-    #             with urllib.request.urlopen(link_input) as response:
-    #                 content = read_file(response)
-    #                 st.write("### Content:")
-    #                 st.write(content)
-    #         except (URLError, HTTPError) as e:
-    #             st.error(f"Error reading content from the provided link: {e}")
+    if st.button("Search", key=None, help=None, on_click=None, args=None, kwargs=None, type="secondary", disabled=False, use_container_width=False): 
+        store_embeddings(document_title)
 
 if __name__ == "__main__":
     main()
