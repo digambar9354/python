@@ -10,6 +10,7 @@ from langchain.text_splitter import CharacterTextSplitter
 from langchain_community.vectorstores import LanceDB
 
 import lancedb
+os.environ["LANGCHAIN_API_KEY"] = "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"
 
 def connect_table(database):
     try:
@@ -35,23 +36,22 @@ def create_table(db):
     return table
 
 def store_embeddings(content, document_title):
-    try:
-        db = connect_table('lancedb')
-        table = connect_table(db)
-        documents = character_text_splitter(content, document_title)
-        if not isinstance(table, lancedb.db.LanceTable):
-            return st.error(f"Expected 'table' to be an instance of lancedb.db.LanceTable, but got {lancedb} {db}")
-        
-        db = LanceDB.from_documents(documents, OpenAIEmbeddings(), connection=table)
-        return True
-    except Exception as e:
-        return st.error(f"Error during LanceDB operations: {e}")
+    db = lancedb.connect("~/.lancedb")
+    table = db.open_table("recipes")
+
+    documents = character_text_splitter(content, document_title)
+    docsearch = LanceDB.from_documents(documents, OpenAIEmbeddings(), connection=table)
+
+    query = "Get METHOD for Aloo Palak"
+    docs = docsearch.similarity_search(query)
+    return st.error(f"docs: {docs[0].page_content}")
 
 def read_docx(file_path):
     text = docx2txt.process(file_path)
     return text
 
 def read_pdf(file_path):
+    
     if not os.path.exists(file_path):
         raise FileNotFoundError(f"PDF file not found at: {file_path}")
 
