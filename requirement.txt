@@ -1,7 +1,0 @@
-streamlit>=1.30
-docx2txt>=0.8
-langchain_openai>=0.0.3
-langchain>=0.1.3
-langchain_community>=0.0.15
-LanceDB>=0.5.1
-PyMuPDF>=1.23
