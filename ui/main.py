@@ -2,18 +2,21 @@ import streamlit as st
 import docx2txt
 import fitz
 import os
-from langchain.text_splitter import RecursiveCharacterTextSplitter, CharacterTextSplitter
-from langchain_openai import OpenAIEmbeddings
-from langchain_openai import ChatOpenAI
-
-from langchain_community.document_loaders import TextLoader
 from langchain.text_splitter import CharacterTextSplitter
+from langchain_openai import OpenAIEmbeddings
+from dotenv import load_dotenv
+from pathlib import Path
+
 from langchain_community.vectorstores import LanceDB
-from langchain.chains.summarize import load_summarize_chain
 
 import lancedb
-import openai
-os.environ["LANGCHAIN_API_KEY"] = "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"
+import os
+
+load_dotenv()
+env_path = Path('.')/'.env'
+load_dotenv(dotenv_path=env_path)
+
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 def connect_table(database):
     try:
@@ -50,7 +53,8 @@ def store_embeddings(content, document_title):
         query = "Get METHOD for Aloo Palak"
 
         # ->>>> similarity_search
-        docs = docsearch.similarity_search(query)
+        docs = docsearch.similarity_search(query, k=1, score=True)
+        st.write(docs)
 
         # ->>>> similarity_search_by_vector
         # embedding_vector = OpenAIEmbeddings().embed_query(query)
@@ -68,7 +72,6 @@ def read_docx(file_path):
     return text
 
 def read_pdf(file_path):
-    
     if not os.path.exists(file_path):
         raise FileNotFoundError(f"PDF file not found at: {file_path}")
 
@@ -84,20 +87,13 @@ def read_file(file):
 
     if file.type == "application/pdf":
         try:
-            content = read_pdf(file.name)  # Assuming file.name contains the temporary path
+            content = read_pdf(file.name)
         except FileNotFoundError as e:
             st.error(f"Error reading PDF file: {e}")
     elif file.type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
         content = read_docx(file)
     
-    formatted_text = content.upper()  # For example, convert to uppercase
-    # try:
-    #     # Use the fine-tuned model in LangChain
-    #     fine_tuned_model  =  ChatOpenAI(temperature=0.7, modal_name='gpt-3.5-tubo')
-    #     formatted_text = fine_tuned_model("There were three ravens sat on a tree.")
-    # except FileNotFoundError as e:
-    #     st.error(f"Error while formatting: {e}")
-    # st.write(formatted_text)
+    formatted_text = content.upper()
     return formatted_text
 
 def character_text_splitter(content, document_title):
@@ -119,20 +115,15 @@ def main():
     st.markdown("# File Upload")
     st.sidebar.markdown("# File Upload")
 
-    # Document title
     document_title = st.text_input("Enter the document title:")
-
-    # File upload
     uploaded_file = st.file_uploader("Upload a document (doc, pdf) or provide a link", type=["docx", "pdf"])
 
     if uploaded_file is not None:
         try:
             content = read_file(uploaded_file)
-
-            embedings = store_embeddings(content, document_title)
-            # texts = character_text_splitter(content, document_title)
+            documents = store_embeddings(content, document_title)
             st.write("### Content:")
-            st.write(embedings)
+            st.write(documents)
         except FileNotFoundError as e:
             st.error(f"Error reading content from the uploaded file: {e}")
             

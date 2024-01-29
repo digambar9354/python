@@ -1,26 +1,42 @@
 import streamlit as st
-import docx2txt
-import fitz
 import os
-from langchain.text_splitter import RecursiveCharacterTextSplitter, CharacterTextSplitter
-from langchain_openai import OpenAIEmbeddings
-
-from langchain_community.document_loaders import TextLoader
 from langchain.text_splitter import CharacterTextSplitter
-from langchain_community.vectorstores import LanceDB
+from langchain_openai import ChatOpenAI, OpenAI
+from langchain_core.runnables import RunnablePassthrough
+from langchain_core.output_parsers import StrOutputParser
+from langchain.chains import create_retrieval_chain
+from langchain.chains.question_answering import load_qa_chain
 
-import lancedb
-os.environ["LANGCHAIN_API_KEY"] = "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"
+from dotenv import load_dotenv
+from pathlib import Path
 
-def get_embeddings(query):
+import os
+
+load_dotenv()
+env_path = Path('.')/'.env'
+load_dotenv(dotenv_path=env_path)
+
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
+
+def get_searched_documents(query):
     if "sharedsearch" in st.session_state:
         st.write(st.session_state["sharedsearch"])
         docs = st.session_state["sharedsearch"].similarity_search(query)
-        return docs[0].page_content
+        return docs[0]
     else: 
-        return st.error(f"docs not found")
+        return ''
+    
+def get_ai_result(docs, query):
+    st.write("### docs")
+    st.write(docs)
 
-def character_text_splitter(content, document_title):
+    chain = load_qa_chain(OpenAI(), chain_type="stuff")
+
+    result = chain.run(input_documents=docs, question=query)
+    return result
+
+def character_text_splitter(content, search):
     text_splitter = CharacterTextSplitter(
         separator="\n\n\t\t",
         chunk_size=1000,
@@ -29,26 +45,27 @@ def character_text_splitter(content, document_title):
         is_separator_regex=False,
         keep_separator=True
     )
-    metadatas = [{"title": document_title}]
+    metadatas = [{"title": search}]
 
     documents = text_splitter.create_documents([content], metadatas=metadatas)
     return documents
 
 def main():
-    
     st.markdown("# Search")
     st.sidebar.markdown("# Search")
 
     # Document title
-    document_title = st.text_input("Enter the document title:")
+    query = st.text_input("Enter the query")
 
     if st.button("Search", key=None, help=None, on_click=None, args=None, kwargs=None, type="secondary", disabled=False, use_container_width=False): 
-        
-        result = get_embeddings(document_title)
-        
+        doc = get_searched_documents(query)
+
+        output = get_ai_result(doc, query)
         st.write("#### Output:")
-        st.write(result)
-        
+        if output:
+            st.write(output)
+        else:
+            st.error(f"Document not found")
 
 if __name__ == "__main__":
     main()

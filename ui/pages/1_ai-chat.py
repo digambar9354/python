@@ -1,16 +1,15 @@
 import streamlit as st
-import os
 from streamlit_chat import message
 
-from langchain.prompts.chat import (
-    ChatPromptTemplate,
-    HumanMessagePromptTemplate,
-    SystemMessagePromptTemplate,
-)
 from langchain.schema import HumanMessage, SystemMessage
 from langchain_openai import ChatOpenAI
+from dotenv import dotenv_values
 
-chat = ChatOpenAI(openai_api_key="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", temperature=0)
+config = dotenv_values(".env")
+
+OPENAI_API_KEY=config.OPENAI_API_KEY
+
+chat = ChatOpenAI(temperature=0)
 
 if "messages" not in st.session_state:
     st.session_state.messages = [
@@ -41,6 +40,7 @@ def on_input_change():
 
 def on_btn_click():
     del st.session_state.past[:]
+    del st.session_state.messages[:]
     del st.session_state.generated[:]
 
 st.session_state.setdefault('past', [])
@@ -60,7 +60,7 @@ with chat_placeholder.container():
             is_table=True if st.session_state['generated'][i]['type']=='table' else False
         )
 
-    if len(st.session_state['generated']) > 0:
+    if len(st.session_state['generated']) >= 1:
         st.button("Clear message", on_click=on_btn_click)
 
 with st.container():
