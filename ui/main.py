@@ -13,7 +13,7 @@ from langchain.chains.summarize import load_summarize_chain
 
 import lancedb
 import openai
-os.environ["LANGCHAIN_API_KEY"] = "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"
+os.environ["LANGCHAIN_API_KEY"] = "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"
 
 def connect_table(database):
     try:

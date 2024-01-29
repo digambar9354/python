@@ -10,7 +10,7 @@ from langchain.text_splitter import CharacterTextSplitter
 from langchain_community.vectorstores import LanceDB
 
 import lancedb
-os.environ["LANGCHAIN_API_KEY"] = "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"
+os.environ["LANGCHAIN_API_KEY"] = "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"
 
 def main():
     st.markdown("# Jugalbandi")
