@@ -10,7 +10,7 @@ from langchain.text_splitter import CharacterTextSplitter
 from langchain_community.vectorstores import LanceDB
 
 import lancedb
-os.environ["LANGCHAIN_API_KEY"] = "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"
+os.environ["LANGCHAIN_API_KEY"] = "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"
 
 def get_embeddings(query):
     if "sharedsearch" in st.session_state:

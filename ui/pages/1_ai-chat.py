@@ -10,7 +10,7 @@ from langchain.prompts.chat import (
 from langchain.schema import HumanMessage, SystemMessage
 from langchain_openai import ChatOpenAI
 
-os.environ["LANGCHAIN_API_KEY"] = "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"
+os.environ["LANGCHAIN_API_KEY"] = "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"
 chat = ChatOpenAI(temperature=0)
 messages = []
 
