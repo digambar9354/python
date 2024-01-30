@@ -21,19 +21,18 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 def get_searched_documents(query):
     if "sharedsearch" in st.session_state:
-        st.write(st.session_state["sharedsearch"])
-        docs = st.session_state["sharedsearch"].similarity_search(query)
-        return docs[0]
+        docs = st.session_state["sharedsearch"].similarity_search(query, k=2)
+        return docs
     else: 
         return ''
     
 def get_ai_result(docs, query):
-    st.write("### docs")
-    st.write(docs)
-
-    chain = load_qa_chain(OpenAI(), chain_type="stuff")
-
+    # st.write("### docs")
+    # st.write(docs)
+    chain = load_qa_chain(ChatOpenAI(), chain_type="stuff")
     result = chain.run(input_documents=docs, question=query)
+    st.write("### chain")
+    st.write(chain)
     return result
 
 def character_text_splitter(content, search):

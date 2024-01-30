@@ -5,9 +5,16 @@ from langchain.schema import HumanMessage, SystemMessage
 from langchain_openai import ChatOpenAI
 from dotenv import dotenv_values
 
-config = dotenv_values(".env")
+from dotenv import load_dotenv
+from pathlib import Path
 
-OPENAI_API_KEY=config.OPENAI_API_KEY
+import os
+
+load_dotenv()
+env_path = Path('.')/'.env'
+load_dotenv(dotenv_path=env_path)
+
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 chat = ChatOpenAI(temperature=0)
 
