@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "code-base"
+version = "0.1.0"
+description = ""
+authors = ["Digambar Vibhute <digambar@pixel6.co>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+jb-core = {path = "./packages/jb-core", develop = true}
+jb-translator = {path = "./packages/jb-translator", develop = true}
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
