@@ -10,26 +10,44 @@ from jugalbandi.core import (
 )
 import json
 
-
-
 bhashini_user_id = os.getenv('BHASHINI_USER_ID')
 bhashini_api_key = os.getenv('BHASHINI_API_KEY')
 bhashini_pipleline_id = os.getenv('BHASHINI_PIPELINE_ID')
 
 bhashini_inference_url = "https://dhruva-api.bhashini.gov.in/services/inference/pipeline"
 
-def on_btn_click(document_title):
-    output = asyncio.run(translate_text(document_title, "EN", "MR"))
-    st.write(output)
-
+def on_btn_click(document_title, from_lang, to_lang):
+    if (document_title and from_lang and to_lang):
+        output = asyncio.run(translate_text(document_title, from_lang, to_lang))
+        st.write(output)
+    else:
+        st.write(output)
 
 def main():
-    st.markdown("# Bhashini")
+    st.markdown("# Bhashini text translation")
     st.sidebar.markdown("# Bhashini")
 
-    document_title = st.text_input("Enter text to convert:")
+    searched_text = st.text_input("Enter text to convert:")
+    
+    from_lang = st.selectbox(
+    "Convert from",
+        ("EN", "MR"),
+        index=None,
+        placeholder="Select Language...",
+    )
 
-    st.button("Convert", on_click=on_btn_click(document_title))
+    st.write('You selected:', from_lang)
+
+    to_lang = st.selectbox(
+    "Convert to",
+        ("EN", "MR"),
+        index=None,
+        placeholder="Select Language...",
+    )
+
+    st.write('You selected:', to_lang)
+
+    st.button("Convert", on_click=on_btn_click(searched_text, from_lang ,to_lang ))
 
 
 async def perform_bhashini_config_call( task: str,

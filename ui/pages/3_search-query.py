@@ -21,7 +21,9 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 def get_searched_documents(query):
     if "sharedsearch" in st.session_state:
-        docs = st.session_state["sharedsearch"].similarity_search(query, k=2)
+        docs = st.session_state["sharedsearch"].similarity_search(query, k=3)
+        st.write("##### Similarity search")
+        st.write(docs)
         return docs
     else: 
         return ''
